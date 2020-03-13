@@ -1,9 +1,7 @@
 package kz.iitu.course.DAO;
 
 import kz.iitu.course.Client.*;
-import kz.iitu.course.Event.ClientCreateEvent;
-import kz.iitu.course.Event.ClientDeleteEvent;
-import kz.iitu.course.Event.ClientModifyEvent;
+import kz.iitu.course.Event.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
@@ -80,9 +78,12 @@ public class ClientDao implements ApplicationEventPublisherAware {
 
     public void getAllClients() throws SQLException {
         connectionDao.getAllClients();
+        this.eventPublisher.publishEvent(new GetAllClientsEvent(this));
     }
     public void getAllTeachers() throws SQLException {
         connectionDao.getAllTeachers();
+        this.eventPublisher.publishEvent(new GetAllTeachersEvent(this));
+
     }
     @Override
     public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {

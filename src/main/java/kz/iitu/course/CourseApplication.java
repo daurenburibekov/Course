@@ -23,9 +23,11 @@ public class CourseApplication {
             System.out.println("4. Создать клиента");
             System.out.println("5. Создать курс");
             System.out.println("6. Создать преподавателя");
-            System.out.println("7. Список групп по курсу");
-            System.out.println("8. Список курс по клиенту");
-            System.out.println("9. Список курс по преподавателю");
+            System.out.println("7. Добавить клиента на курс");
+            System.out.println("8. Удалить клиента с курса");
+            System.out.println("9. Список групп по курсу");
+            System.out.println("10. Список курс по клиенту");
+            System.out.println("11. Список курс по преподавателю");
             switch (in.nextInt()){
                 case 1:
                     clientDao.getAllClients();
@@ -67,17 +69,29 @@ public class CourseApplication {
                     clientDao.createTeacher(in.next());
                     break;
                 case 7:
+                    System.out.println("Имя клиента:");
+                    System.out.println("Название курса:");
+                    courseDao.addToCourse(in.next(), in.next());
+                    break;
+                case 8:
+                    System.out.println("Имя клиента:");
+                    System.out.println("Название курса:");
+                    courseDao.deleteFromCourse(in.next(), in.next());
+                    break;
+                case 9:
                     System.out.println("Название курса:");
                     courseDao.getCourseMembers(in.next());
                     break;
-                case 8:
+                case 10:
                     System.out.println("Имя студента:");
                     courseDao.getMemberCourses(in.next());
                     break;
-                case 9:
+                case 11:
                     System.out.println("Имя преподавателя:");
                     courseDao.getTeacherCourses(in.next());
                     break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + in.nextInt());
             }
         }
     }

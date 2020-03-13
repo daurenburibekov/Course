@@ -101,12 +101,13 @@ public class ConnectionDao {
 
     //Courses
     public void addCourse(Course course) throws SQLException {
-        if(getCourseByName(course.getName())) {
-            String SQL = "INSERT INTO courses.courses (coursename, payment, month) VALUES(?, ?, ?)";
+        if(!getCourseByName(course.getName())) {
+            String SQL = "INSERT INTO courses.courses (coursename, payment, month, teachername) VALUES(?, ?, ?, ?)";
             pstmt = connection.prepareStatement(SQL);
             pstmt.setString(1, course.getName());
             pstmt.setDouble(2, course.getMonthlyPayment());
             pstmt.setInt(3, course.getMonth());
+            pstmt.setString(4, course.getTeacher().getName());
             pstmt.executeUpdate();
         }
     }
@@ -136,7 +137,7 @@ public class ConnectionDao {
     public Course getCourseObjByName(String coursename) throws SQLException {
         rs = statement.executeQuery("SELECT * FROM courses.courses WHERE coursename = '" + coursename + "'");
         if (rs.next()) {
-            return new Course(rs.getString(1),rs.getDouble(2),rs.getInt(3) );
+            return new Course(rs.getString(1),rs.getDouble(2),rs.getInt(3),new Teacher(rs.getString(4)));
         }
         System.out.println("Нету такого курса");
         return null;
@@ -149,24 +150,24 @@ public class ConnectionDao {
         }
     }
     public void getCourseMembers(String coursename) throws SQLException {
-        rs = statement.executeQuery("select name, course_id, teacher from courseclients inner join clients on client_id = id where course_id = '" + coursename + "'");
+        rs = statement.executeQuery("select name, course_id, teachername from courses.courseclients inner join courses.clients on client_id = id where course_id = '" + coursename + "'");
         System.out.printf("%-30.30s %-30.30s %-30.30s%n", "Имя клиента", "Название курса", "Имя преподавателя");
         while (rs.next()) {
-            System.out.printf("%-30.30s %-30.30s%n", rs.getString("client_id"), rs.getString("course_id"), rs.getString("teachername"));
+            System.out.printf("%-30.30s %-30.30s %-30.30s%n", rs.getString("name"), rs.getString("course_id"), rs.getString("teachername"));
         }
     }
     public void getMemberCourses(String name) throws SQLException {
-        rs = statement.executeQuery("select name, course_id, teacher from courseclients inner join clients on client_id = id where client_id = '" + name + "'");
+        rs = statement.executeQuery("select name, course_id, teachername from courses.courseclients inner join courses.clients on client_id = id where client_id = '" + getClientIdByName(name) + "'");
         System.out.printf("%-30.30s %-30.30s %-30.30s%n", "Имя клиента", "Название курса", "Имя преподавателя");
         while (rs.next()) {
-            System.out.printf("%-30.30s %-30.30s%n", rs.getString("client_id"), rs.getString("course_id"), rs.getString("teachername"));
+            System.out.printf("%-30.30s %-30.30s %-30.30s%n", rs.getString("name"), rs.getString("course_id"), rs.getString("teachername"));
         }
     }
     public void getTeacherCourse(String name) throws SQLException {
-        rs = statement.executeQuery("select name, course_id, teacher from courseclients inner join clients on client_id = id where teachername = '" + name + "'");
+        rs = statement.executeQuery("select name, course_id, teachername from courses.courseclients inner join courses.clients on client_id = id where teachername = '" + name + "'");
         System.out.printf("%-30.30s %-30.30s %-30.30s%n", "Имя клиента", "Название курса", "Имя преподавателя");
         while (rs.next()) {
-            System.out.printf("%-30.30s %-30.30s%n", rs.getString("client_id"), rs.getString("course_id"), rs.getString("teachername"));
+            System.out.printf("%-30.30s %-30.30s %-30.30s%n", rs.getString("name"), rs.getString("course_id"), rs.getString("teachername"));
         }
     }
 
@@ -195,27 +196,36 @@ public class ConnectionDao {
             System.out.printf("%-30.30s%n", rs.getString("name"));
         }
     }
+    public String getTeacherByCourse(String coursename) throws SQLException {
+        rs = statement.executeQuery("SELECT teachername FROM courses.courses WHERE coursename = '" + coursename + "'");
+        if (rs.next()) {
+            return rs.getString(1);
+        }
+        System.out.println("Такого преподователя нету");
+        return null;
+    }
 
     //Add to course student
-    public void addToCourse(String name, String coursename) throws SQLException {
+    public void addToCourse(String name, String coursename, String teacherName) throws SQLException {
         if (getClientByName(name) || getCourseByName(coursename)) {
-            String SQL = "INSERT INTO courses.courseclients(client_id, course_id) VALUES(?, ?)";
+            String SQL = "INSERT INTO courses.courseclients(client_id, course_id, teachername) VALUES(?, ?, ?)";
             pstmt = connection.prepareStatement(SQL);
             pstmt.setInt(1, getClientIdByName(name));
             pstmt.setString(2, coursename);
+            pstmt.setString(3, teacherName);
             pstmt.executeUpdate();
         }
     }
     public void deleteFromCourse(String name, String coursename) throws SQLException {
-        statement.executeUpdate("DELETE FROM courses.courseclients WHERE client_id = '" + getClientByName(name) + "' and  course_id = '" + coursename + "'");
+        statement.executeUpdate("DELETE FROM courses.courseclients WHERE client_id = '" + getClientIdByName(name) + "' and  course_id = '" + coursename + "'");
     }
 
     public boolean getCourseMember(String name, String coursename) throws SQLException {
-        rs = statement.executeQuery("SELECT * FROM courses.courseclients WHERE client_id = '" + getClientByName(name) + "' and course_id = '" + coursename +"'");
+        rs = statement.executeQuery("SELECT * FROM courses.courseclients WHERE client_id = '" + getClientIdByName(name) + "' and course_id = '" + coursename +"'");
         if (rs.next()) {
             return true;
         }
-        System.out.println("Такого преподователя нету");
+        System.out.println("Таких данных еще нету");
         return false;
     }
 }
