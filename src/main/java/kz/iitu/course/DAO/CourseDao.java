@@ -21,7 +21,7 @@ public class CourseDao implements ApplicationEventPublisherAware {
     private ApplicationEventPublisher eventPublisher;
 
     public void createCourse(String name, double monthlyPayment, int month, String teacherName) throws SQLException {
-        if (connectionDao.getTeacherByName(teacherName) != null && connectionDao.getCourseByName(name)==null) {
+        if (connectionDao.getTeacherByName(teacherName) != null && !connectionDao.getCourseByName(name)) {
             Teacher teacher = connectionDao.getTeacherByName(teacherName);
             Course course = new Course(name, monthlyPayment, month, teacher);
             connectionDao.addCourse(course);
@@ -34,7 +34,7 @@ public class CourseDao implements ApplicationEventPublisherAware {
     }
 
     public void updateCourse(String name, double monthlyPayment, int month) throws SQLException {
-        if (connectionDao.getCourseByName(name) != null) {
+        if (connectionDao.getCourseByName(name)) {
             Course course = new Course(name, monthlyPayment, month);
             connectionDao.updateCourse(course);
             this.eventPublisher.publishEvent(new CourseModifyEvent(this, course));
@@ -43,7 +43,7 @@ public class CourseDao implements ApplicationEventPublisherAware {
     }
 
     public void deleteCourse(String name) throws SQLException {
-        if (connectionDao.getCourseByName(name) != null) {
+        if (connectionDao.getCourseByName(name)) {
             connectionDao.deleteCourseByName(name);
             this.eventPublisher.publishEvent(new CourseDeleteEvent(this, name));
         }
@@ -51,7 +51,7 @@ public class CourseDao implements ApplicationEventPublisherAware {
 
     public void addToCourse(String name, String coursename) throws SQLException {
         if(!connectionDao.getCourseMember(name, coursename)) {
-            if (connectionDao.getClientByName(name) != 0 && connectionDao.getCourseByName(coursename) != null) {
+            if (connectionDao.getClientByName(name) && connectionDao.getCourseByName(coursename)) {
                 connectionDao.addToCourse(name, coursename);
                 this.eventPublisher.publishEvent(new AddToCourseEvent(this, connectionDao.getCourseObjByName(coursename), name));
             }
@@ -60,17 +60,32 @@ public class CourseDao implements ApplicationEventPublisherAware {
         }
     }
 
-
     public void deleteFromCourse(String name, String coursename) throws SQLException {
-        if (connectionDao.getClientByName(name) != 0 && connectionDao.getCourseByName(coursename) != null) {
+        if (connectionDao.getClientByName(name) && connectionDao.getCourseByName(coursename)) {
             connectionDao.deleteFromCourse(name, coursename);
         }
     }
 
+    public void getAllCourses() throws SQLException {
+        connectionDao.getAllCourses();
+    }
+    public void getCourseMembers(String coursename) throws SQLException {
+        if (connectionDao.getCourseByName(coursename))
+        connectionDao.getCourseMembers(coursename);
+    }
+    public void getMemberCourses(String name) throws SQLException {
+        if(connectionDao.getClientByName(name))
+        connectionDao.getMemberCourses(name);
+    }
+    public void getTeacherCourses(String name) throws SQLException {
+        if(connectionDao.getTeacherByName(name) != null)
+            connectionDao.getTeacherCourse(name);
+    }
     @Override
     public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
         this.eventPublisher = applicationEventPublisher;
     }
+
 
 
 }

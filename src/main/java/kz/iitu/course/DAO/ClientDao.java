@@ -19,7 +19,7 @@ public class ClientDao implements ApplicationEventPublisherAware {
     private ApplicationEventPublisher eventPublisher;
 
     public void createAdultClient(String name) throws SQLException {
-        if( connectionDao.getClientByName(name) == 0) {
+        if(!connectionDao.getClientByName(name)) {
             Adult adult = new Adult(name);
             connectionDao.addClient(adult);
             this.eventPublisher.publishEvent(new ClientCreateEvent(this, adult));
@@ -29,7 +29,7 @@ public class ClientDao implements ApplicationEventPublisherAware {
         }
     }
     public void createChildClient(String name) throws SQLException {
-        if( connectionDao.getClientByName(name) == 0) {
+        if( !connectionDao.getClientByName(name)) {
             Child child = new Child(name);
             connectionDao.addClient(child);
             this.eventPublisher.publishEvent(new ClientCreateEvent(this, child));
@@ -39,7 +39,7 @@ public class ClientDao implements ApplicationEventPublisherAware {
         }
     }
     public void createStudentClient(String name) throws SQLException {
-        if( connectionDao.getClientByName(name) == 0) {
+        if( !connectionDao.getClientByName(name)) {
             Student student = new Student(name);
             connectionDao.addClient(student);
             this.eventPublisher.publishEvent(new ClientCreateEvent(this, student));
@@ -55,7 +55,7 @@ public class ClientDao implements ApplicationEventPublisherAware {
         }
     }
     public void deleteClient(String name) throws SQLException {
-        if (connectionDao.getClientByName(name) != 0) {
+        if (connectionDao.getClientByName(name)) {
             connectionDao.deleteClientByName(name);
             this.eventPublisher.publishEvent(new ClientDeleteEvent(this, name));
         }
@@ -78,7 +78,12 @@ public class ClientDao implements ApplicationEventPublisherAware {
         }
     }
 
-
+    public void getAllClients() throws SQLException {
+        connectionDao.getAllClients();
+    }
+    public void getAllTeachers() throws SQLException {
+        connectionDao.getAllTeachers();
+    }
     @Override
     public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
         this.eventPublisher = applicationEventPublisher;

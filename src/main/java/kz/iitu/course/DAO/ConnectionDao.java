@@ -67,7 +67,15 @@ public class ConnectionDao {
     public void deleteClientByName(String name) throws SQLException {
         statement.executeUpdate("DELETE FROM courses.clients WHERE name = '" + name + "'");
     }
-    public int getClientByName(String name) throws SQLException {
+    public boolean getClientByName(String name) throws SQLException {
+        rs = statement.executeQuery("SELECT id FROM courses.clients WHERE name = '" + name + "'");
+        if (rs.next()) {
+            return true;
+        }
+        System.out.println("Такого клиента нету");
+        return false;
+    }
+    public int getClientIdByName(String name) throws SQLException {
         rs = statement.executeQuery("SELECT id FROM courses.clients WHERE name = '" + name + "'");
         if (rs.next()) {
             return rs.getInt(1);
@@ -83,10 +91,17 @@ public class ConnectionDao {
         System.out.println("Такого клиента нету");
         return 0;
     }
+    public void getAllClients() throws SQLException {
+        rs = statement.executeQuery("SELECT * FROM courses.clients");
+        System.out.printf("%-30.30s %-30.30s %-30.30s%n", "ID", "Name", "Type");
+        while (rs.next()) {
+            System.out.printf("%-30.30s %-30.30s %-30.30s%n", rs.getInt("id"), rs.getString("name"), rs.getString("type"));
+        }
+    }
 
     //Courses
     public void addCourse(Course course) throws SQLException {
-        if(getCourseByName(course.getName())!= null) {
+        if(getCourseByName(course.getName())) {
             String SQL = "INSERT INTO courses.courses (coursename, payment, month) VALUES(?, ?, ?)";
             pstmt = connection.prepareStatement(SQL);
             pstmt.setString(1, course.getName());
@@ -96,7 +111,7 @@ public class ConnectionDao {
         }
     }
     public void updateCourse(Course course) throws SQLException {
-        if(getCourseByName(course.getName())!= null) {
+        if(getCourseByName(course.getName())) {
             String SQL = "UPDATE courses.courses SET payment = ?, month = ? WHERE coursename = ?";
             pstmt = connection.prepareStatement(SQL);
             pstmt.setDouble(1, course.getMonthlyPayment());
@@ -106,17 +121,17 @@ public class ConnectionDao {
         pstmt.executeUpdate();
     }
     public void deleteCourseByName(String name) throws SQLException {
-        if(getCourseByName(name)!= null) {
+        if(getCourseByName(name)) {
             statement.executeUpdate("DELETE FROM courses.courses WHERE coursename = '" + name + "'");
         }
     }
-    public String getCourseByName(String coursename) throws SQLException {
+    public boolean getCourseByName(String coursename) throws SQLException {
         rs = statement.executeQuery("SELECT coursename FROM courses.courses WHERE coursename = '" + coursename + "'");
         if (rs.next()) {
-            return rs.getString(1);
+            return true;
         }
         System.out.println("Нету такого курса");
-        return null;
+        return false;
     }
     public Course getCourseObjByName(String coursename) throws SQLException {
         rs = statement.executeQuery("SELECT * FROM courses.courses WHERE coursename = '" + coursename + "'");
@@ -125,6 +140,34 @@ public class ConnectionDao {
         }
         System.out.println("Нету такого курса");
         return null;
+    }
+    public void getAllCourses() throws SQLException {
+        rs = statement.executeQuery("SELECT * FROM courses.courses");
+        System.out.printf("%-30.30s %-30.30s %-30.30s%n", "Course Name", "Payment of month", "Month");
+        while (rs.next()) {
+            System.out.printf("%-30.30s %-30.30s %-30.30s%n", rs.getString("coursename"), rs.getString("payment"), rs.getString("month"));
+        }
+    }
+    public void getCourseMembers(String coursename) throws SQLException {
+        rs = statement.executeQuery("select name, course_id, teacher from courseclients inner join clients on client_id = id where course_id = '" + coursename + "'");
+        System.out.printf("%-30.30s %-30.30s %-30.30s%n", "Имя клиента", "Название курса", "Имя преподавателя");
+        while (rs.next()) {
+            System.out.printf("%-30.30s %-30.30s%n", rs.getString("client_id"), rs.getString("course_id"), rs.getString("teachername"));
+        }
+    }
+    public void getMemberCourses(String name) throws SQLException {
+        rs = statement.executeQuery("select name, course_id, teacher from courseclients inner join clients on client_id = id where client_id = '" + name + "'");
+        System.out.printf("%-30.30s %-30.30s %-30.30s%n", "Имя клиента", "Название курса", "Имя преподавателя");
+        while (rs.next()) {
+            System.out.printf("%-30.30s %-30.30s%n", rs.getString("client_id"), rs.getString("course_id"), rs.getString("teachername"));
+        }
+    }
+    public void getTeacherCourse(String name) throws SQLException {
+        rs = statement.executeQuery("select name, course_id, teacher from courseclients inner join clients on client_id = id where teachername = '" + name + "'");
+        System.out.printf("%-30.30s %-30.30s %-30.30s%n", "Имя клиента", "Название курса", "Имя преподавателя");
+        while (rs.next()) {
+            System.out.printf("%-30.30s %-30.30s%n", rs.getString("client_id"), rs.getString("course_id"), rs.getString("teachername"));
+        }
     }
 
     //Teachers
@@ -145,14 +188,21 @@ public class ConnectionDao {
     public void deleteTeacher(String teacherName) throws SQLException {
         statement.executeUpdate("DELETE FROM courses.teachers WHERE name = '" + teacherName + "'");
     }
+    public void getAllTeachers() throws SQLException {
+        rs = statement.executeQuery("SELECT * FROM courses.teachers");
+        System.out.printf("%-30.30s%n", "Name of teacher");
+        while (rs.next()) {
+            System.out.printf("%-30.30s%n", rs.getString("name"));
+        }
+    }
 
     //Add to course student
     public void addToCourse(String name, String coursename) throws SQLException {
-        if (getClientByName(name) != 0 || getCourseByName(coursename) != null) {
+        if (getClientByName(name) || getCourseByName(coursename)) {
             String SQL = "INSERT INTO courses.courseclients(client_id, course_id) VALUES(?, ?)";
             pstmt = connection.prepareStatement(SQL);
-            pstmt.setInt(1, getClientByName(name));
-            pstmt.setString(2, getCourseByName(coursename));
+            pstmt.setInt(1, getClientIdByName(name));
+            pstmt.setString(2, coursename);
             pstmt.executeUpdate();
         }
     }
