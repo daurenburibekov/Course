@@ -1,0 +1,10 @@
+The program is designed for programming courses.
+There are different example courses: Java, Python.
+The course will have titles, a monthly fee, certain dates (how long it will take to study),
+and there will be teachers who teach this course.
+And there are clients who can enroll in certain courses.
+They will have names, the names are determined by the client.
+And there will be teachers who implement the user.
+ClientTao to manage the client and teacher.
+Course Dao to control the course.
+And ConnectionDao to manage the database.

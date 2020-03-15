@@ -15,6 +15,8 @@ public class CourseApplication {
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(SpringConfiguration.class);
         CourseDao courseDao = context.getBean("courseDao", CourseDao.class);
         ClientDao clientDao = context.getBean("clientDao", ClientDao.class);
+        ConnectionDao connectionDao = context.getBean("connectionDao", ConnectionDao.class);
+        connectionDao.createDb();
         Scanner in = new Scanner(System.in);
         while (true){
             System.out.println("1. Показать всех клиентов");

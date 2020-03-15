@@ -37,6 +37,44 @@ public class ConnectionDao {
         connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
         statement = connection.createStatement();
     }
+    public void createDb() throws SQLException {
+        String SQL = "create table if not exists courses.teachers" +
+                "(\n" +
+                "    name varchar(50) PRIMARY KEY\n" +
+                ");\n" +
+                "create table if not exists courses.clients" +
+                "(" +
+                "        id serial PRIMARY KEY," +
+                "        name VARCHAR (50) UNIQUE NOT NULL," +
+                "        type VARCHAR (50) NOT NULL" +
+                ");" +
+                "create table if not exists courses.courses" +
+                "(\n" +
+                "    coursename varchar(50) PRIMARY KEY,\n" +
+                "    payment double precision NOT NULL,\n" +
+                "    month int NOT NULL,\n" +
+                "    teachername VARCHAR (50) NOT NULL,\n" +
+                "    CONSTRAINT teachername FOREIGN KEY (teachername)\n" +
+                "        REFERENCES courses.teachers (name)\n" +
+                ");\n" +
+                "\n" +
+                "\n" +
+                "\n" +
+                "create table if not exists courses.courseclients\n" +
+                "(\n" +
+                "    client_id int NOT NULL,\n" +
+                "    course_id varchar(50) NOT NULL,\n" +
+                "    teachername varchar(50) NOT NULL,\n" +
+                "    CONSTRAINT client_id FOREIGN KEY (client_id)\n" +
+                "        REFERENCES courses.clients (id),\n" +
+                "    CONSTRAINT course_id FOREIGN KEY (course_id)\n" +
+                "        REFERENCES courses.courses (coursename),\n" +
+                "    CONSTRAINT teachername FOREIGN KEY (teachername)\n" +
+                "        REFERENCES courses.teachers (name)\n" +
+                ");";
+        pstmt = connection.prepareStatement(SQL);
+        pstmt.execute();
+    }
 
     @PreDestroy
     public void destroy() throws SQLException {

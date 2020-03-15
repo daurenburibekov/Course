@@ -26,7 +26,7 @@ public class CourseDao implements ApplicationEventPublisherAware {
             course = null;
             teacher = null;
         } else {
-            System.out.println("Такой курс уже существует");
+            System.out.println("Такой курс либо уже существует, либо такого преподавателя не существует");
         }
     }
 
